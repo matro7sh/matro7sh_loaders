@@ -12,11 +12,10 @@
 set -euo pipefail
 
 # no argument is required, display help and exit
-[ -z "${1}" ] || { tail -n 10 "${0}" && exit 1 ; }
-
+[ $# -ne 0 ] && { head -n 10 "${0}" && exit 1 ; }
 
 # checking if sudo
-[ "$EUID" -ne 0 ] && { tail -n 10 "${0}" && exit 1 ; }
+[ "$EUID" -ne 0 ] && { echo "please run as sudo !" && head -n 10 "${0}" && exit 1 ; }
 
 echo "[+] Installing myph loader"
 go install github.com/cmepw/myph@latest
