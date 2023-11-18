@@ -70,7 +70,7 @@ def execute_myph(file):
     # Create Log
     log.addText(f"this command has been be executed :  {loader_path_myph}/myph -s {shellcode_path} -o /tmp/myph.exe)")
     log.addText(f"check client log to see the AES key")
-    log.addText(f"<b style=\"color:{havoc_success};\">Payload generated successfully at /tmp/bake.exe using myph loader. Happy pwn</b>")
+    log.addText(f"<b style=\"color:{havoc_success};\">Payload generated successfully at /tmp/myph.exe using myph loader. Happy pwn</b>")
     log.setBottomTab()
 
 
