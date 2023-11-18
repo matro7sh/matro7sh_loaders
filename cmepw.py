@@ -13,6 +13,7 @@ from datetime import datetime
 
 # Configuration
 loader_path = "/media/jenaye/data/tools/221b"
+loader_path_myph = "/media/jenaye/data/tools/myph"
 payload_file_path = "/tmp/payload.bin"
 
 # Variables & Defaults
@@ -47,7 +48,7 @@ def change_shellcode_path():
     label_to_replace = formatted_shellcode_path if shellcode_path != " " else f"<b style=\"color:{havoc_error};\">No shellcode selected.</b>" 
 
 
-# Execute Shhhloader and get output
+# Execute 221b loader and get output
 def execute(file): 
     log.addText(f"[<span style=\"color:{havoc_info};\">*</span>] Selecting output file path.")
 
@@ -56,13 +57,27 @@ def execute(file):
 
     # Create Log
     log.addText(f"this command has been be executed :  {loader_path}/221b bake -m aes -k '0123456789ABCDEF1123345611111111' -s {shellcode_path} -o /tmp/bake.exe')")
-    log.addText(f"<b style=\"color:{havoc_success};\">Payload generated successfully at /tmp/bake.exe! Happy pwn</b>")
+    log.addText(f"<b style=\"color:{havoc_success};\">Payload generated successfully at /tmp/bake.exe using 221b loader. Happy pwn</b>")
     log.setBottomTab()
+
+
+def execute_myph(file): 
+    log.addText(f"[<span style=\"color:{havoc_info};\">*</span>] Selecting output file path.")
+
+    os.system(f'{loader_path_myph}/myph -s {shellcode_path} --out /tmp/myph.exe')
+    # give the user the option of choosing the key
+
+    # Create Log
+    log.addText(f"this command has been be executed :  {loader_path_myph}/myph -s {shellcode_path} -o /tmp/myph.exe)")
+    log.addText(f"check client log to see the AES key")
+    log.addText(f"<b style=\"color:{havoc_success};\">Payload generated successfully at /tmp/bake.exe using myph loader. Happy pwn</b>")
+    log.setBottomTab()
+
 
 # Generate payload
 def run():
     log.setBottomTab()
-    log.addText(f"<b style=\"color:{havoc_dark};\">───────────────────────────────</b>")
+    log.addText(f"<b style=\"color:{havoc_dark};\">───────────── running 221b ──────────────────</b>")
     log.addText(f"<b style=\"color:{havoc_comment};\">{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} </b>")
 
    
@@ -74,6 +89,21 @@ def run():
 
     dialog.close()
 
+
+def run_myph():
+    log.setBottomTab()
+    log.addText(f"<b style=\"color:{havoc_dark};\">───────────── running myph ──────────────────</b>")
+    log.addText(f"<b style=\"color:{havoc_comment};\">{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} </b>")
+
+   
+    if shellcode_path == "":
+        havocui.messagebox("Error", "Please specify a valid shellcode path.")
+        log.addText(f"[<span style=\"color:{havoc_error};\">-</span>] No shellcode file specified.")
+        return
+    execute_myph(shellcode_path)
+
+    dialog.close()
+
 def build(): 
     dialog.clear()
 
@@ -82,13 +112,33 @@ def build():
     listeners = havoc.GetListeners()
 
     # Build Dialog
-    dialog.addLabel(f"<b>────────────────────────────── Required Settings ──────────────────────────────</b>")
+    dialog.addLabel(f"<b>──────────────────────────── Required Settings for 221 b ────────────────────────────</b>")
     dialog.addButton("Choose shellcode", change_shellcode_path)
     dialog.addLabel(label_to_replace)
     dialog.addButton("Generate", run)
     dialog.exec() 
 
-# Create Tab 
+
+def build_myph(): 
+    dialog.clear()
+
+    # Get Listeners
+    global listeners
+    listeners = havoc.GetListeners()
+
+    # Build Dialog
+    dialog.addLabel(f"<b>──────────────────────────── Required Settings for Myph ─────────────────────────────</b>")
+    dialog.addButton("Choose shellcode", change_shellcode_path)
+    dialog.addLabel(label_to_replace)
+    dialog.addButton("Generate", run_myph)
+    dialog.exec() 
+
 def loader_generator():
     build()
-havocui.createtab("CMEPW", "221b loader", loader_generator)
+
+def loader_myph_generator():
+    build_myph()
+
+
+# Create Tab 
+havocui.createtab("CMEPW", "221b loader", loader_generator, "myph loader", loader_myph_generator)
