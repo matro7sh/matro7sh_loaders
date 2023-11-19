@@ -16,6 +16,9 @@ loader_path = "/media/jenaye/data/tools/221b"
 loader_path_myph = "/media/jenaye/data/tools/myph"
 payload_file_path = "/tmp/payload.bin"
 
+myph_key = ""
+baker_key = ""
+
 # Variables & Defaults
 shellcode_path = ""
 
@@ -38,6 +41,19 @@ log = havocui.Logger("CMEPW Log")
 
 
 label_to_replace = f"<b style=\"color:{havoc_error};\">No shellcode selected.</b>"
+
+def change_default_key(k): 
+    global myph_key
+    myph_key = k
+    print("[*] Key changed: ", myph_key)
+
+
+def change_default_key_baker(k): 
+    global baker_key
+    baker_key = k
+    print("[*] Key changed: ", baker_key)
+
+
 def change_shellcode_path(): 
     global shellcode_path
     global label_to_replace
@@ -47,13 +63,18 @@ def change_shellcode_path():
     dialog.replaceLabel(label_to_replace, formatted_shellcode_path)
     label_to_replace = formatted_shellcode_path if shellcode_path != " " else f"<b style=\"color:{havoc_error};\">No shellcode selected.</b>" 
 
-
 # Execute 221b loader and get output
 def execute(file): 
     log.addText(f"[<span style=\"color:{havoc_info};\">*</span>] Selecting output file path.")
 
-    os.system(f'{loader_path}/221b bake -m aes -k "0123456789ABCDEF1123345611111111" -s {shellcode_path} -o /tmp/bake.exe')
-    # give the user the option of choosing the key
+    if baker_key == "":
+        log.addText(f"[<span style=\"color:{havoc_info};\">*</span>] No AES key provide it will be this one : '0123456789ABCDEF1123345611111111'")
+        os.system(f'{loader_path}/221b bake -m aes -k "0123456789ABCDEF1123345611111111" -s {shellcode_path} -o /tmp/bake.exe')
+        print(f'{loader_path}/myph -s {shellcode_path} --out /tmp/myph.exe"')
+    else:
+        os.system(f'{loader_path}/221b bake -m aes -k {baker_key} -s {shellcode_path} -o /tmp/bake.exe')
+        print(f'{loader_path}/myph -k {baker_key} -s {shellcode_path} --out /tmp/bake.exe')
+        
 
     # Create Log
     log.addText(f"this command has been be executed :  {loader_path}/221b bake -m aes -k '0123456789ABCDEF1123345611111111' -s {shellcode_path} -o /tmp/bake.exe')")
@@ -62,9 +83,16 @@ def execute(file):
 
 
 def execute_myph(file): 
-    log.addText(f"[<span style=\"color:{havoc_info};\">*</span>] Selecting output file path.")
 
-    os.system(f'{loader_path_myph}/myph -s {shellcode_path} --out /tmp/myph.exe')
+    log.addText(f"[<span style=\"color:{havoc_info};\">*</span>] Selecting output file path.")
+    
+    if myph_key == "":
+        log.addText(f"[<span style=\"color:{havoc_info};\">*</span>] No AES key provide it will be random one.")
+        os.system(f'{loader_path_myph}/myph -s {shellcode_path} --out /tmp/myph.exe')
+        print(f'{loader_path_myph}/myph -s {shellcode_path} --out /tmp/myph.exe"')
+    else:
+        os.system(f'{loader_path_myph}/myph -k {myph_key} -s {shellcode_path} --out /tmp/myph.exe')
+        print(f'{loader_path_myph}/myph -k {myph_key} -s {shellcode_path} --out /tmp/myph.exe')
     # give the user the option of choosing the key
 
     # Create Log
@@ -104,6 +132,7 @@ def run_myph():
 
     dialog.close()
 
+
 def build(): 
     dialog.clear()
 
@@ -115,8 +144,11 @@ def build():
     dialog.addLabel(f"<b>──────────────────────────── Required Settings for 221 b ────────────────────────────</b>")
     dialog.addButton("Choose shellcode", change_shellcode_path)
     dialog.addLabel(label_to_replace)
+    dialog.addLabel("<b>[*] AES key (Default: '0123456789ABCDEF1123345611111111')</b>")
+    dialog.addLineedit("e.g. 0123456789ABCDEF1123345611111111", change_default_key_baker)
     dialog.addButton("Generate", run)
     dialog.exec() 
+
 
 
 def build_myph(): 
@@ -130,6 +162,8 @@ def build_myph():
     dialog.addLabel(f"<b>──────────────────────────── Required Settings for Myph ─────────────────────────────</b>")
     dialog.addButton("Choose shellcode", change_shellcode_path)
     dialog.addLabel(label_to_replace)
+    dialog.addLabel("<b>[*] AES key (Default: random)</b>")
+    dialog.addLineedit("e.g. 0123456789ABCDEF1123345611111111", change_default_key)
     dialog.addButton("Generate", run_myph)
     dialog.exec() 
 
