@@ -2,8 +2,8 @@
 # -*- Coding: UTF-8 -*-
 # Author: @jenaye_fr
 # Created on: Mon, 17. Nov 2023
-# Description: CMEPW Loader support for Havoc C2 framework
-# Usage: Load this script into Havoc: Scripts -> Scripts Manager -> Load to create CMEPW Tab
+# Description: matro7sh Loader support for Havoc C2 framework
+# Usage: Load this script into Havoc: Scripts -> Scripts Manager -> Load to create matro7sh Tab
 
 import os, sys, subprocess
 import threading
@@ -36,8 +36,8 @@ if not os.path.exists(loader_path):
 os.chdir(loader_path)
 
 # Create dialog and log widget
-dialog = havocui.Dialog("CMEPW Payload Generator", True, 670, 300)
-log = havocui.Logger("CMEPW Log")
+dialog = havocui.Dialog("Matro7sh Payload Generator", True, 670, 300)
+log = havocui.Logger("matro7sh Log")
 
 
 label_to_replace = f"<b style=\"color:{havoc_error};\">No shellcode selected.</b>"
@@ -175,4 +175,4 @@ def loader_myph_generator():
 
 
 # Create Tab 
-havocui.createtab("CMEPW", "221b loader", loader_generator, "myph loader", loader_myph_generator)
+havocui.createtab("Matro7sh", "221b loader", loader_generator, "myph loader", loader_myph_generator)
