@@ -6,7 +6,7 @@ this script adds the ability to encode shellcode (.bin) in XOR,chacha20, AES. Yo
 ![](/img/loaders.png)
 ![](/img/myph_loader.png)
 ![](/img/generated.png)
-
+![](/img/poc.png)
 
 # How to use it
 
