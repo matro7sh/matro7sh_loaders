@@ -23,6 +23,9 @@ go install github.com/cmepw/myph@latest
 
 echo "[+] Installing 221b loader"
 
+# goversioninfo is required to be installed externally for 221b
+go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+
 cd /tmp
 git clone https://github.com/CMEPW/221b.git
 
