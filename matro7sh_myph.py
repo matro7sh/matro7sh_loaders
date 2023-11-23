@@ -167,4 +167,4 @@ def loader_generator():
     build()
 
 # Create Tab
-havocui.createtab("Matro7sh", "myph loader", loader_generator)
+havocui.createtab("Matro7sh myph", "myph loader", loader_generator)
