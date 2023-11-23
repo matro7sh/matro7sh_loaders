@@ -32,6 +32,7 @@ HAVOC_WARNING = "#ffb86c"  # Orange
 
 # Labels
 myph_label_to_replace = f"<b style=\"color:{HAVOC_ERROR};\">No shellcode selected.</b>"
+myph_label_execution_technique = ""
 
 if not MYPH_LOADER_PATH:
     print("[-] Loader not found in $PATH")
@@ -50,6 +51,17 @@ def myph_change_shellcode_exec_method(num):
     else:
         myph_shellcode_execution_technique = "CRT"
     print("[*] Shellcode execution method changed: ", myph_shellcode_execution_technique)
+
+    global myph_label_execution_technique
+    warn_label = f"<b style=\"color:{HAVOC_WARNING};\">This method will not use the Process To Inject setting.</b>"
+    techniques_to_warn = {
+        "CreateThread": warn_label,
+        "Syscall": warn_label,
+        "ProcessHollowing": "",
+        "CRT": "",
+    }
+    dialog.replaceLabel(myph_label_execution_technique, techniques_to_warn[myph_shellcode_execution_technique])
+    myph_label_execution_technique = techniques_to_warn[myph_shellcode_execution_technique]
 
 
 def myph_change_target_process(p):
@@ -149,6 +161,7 @@ def myph_loader_generator():
 
         dialog.addLabel("<b>[*] Shellcode execution method</b>")
         dialog.addCombobox(myph_change_shellcode_exec_method, "CRT", *MYPH_EXEC_TECHNIQUES)
+        dialog.addLabel(myph_label_execution_technique)
 
         dialog.addLabel("<b>[*] AES Encryption key (Default: random)</b>")
         dialog.addLineedit("e.g. 0123456789ABCDEF1123345611111111", myph_change_default_key)
