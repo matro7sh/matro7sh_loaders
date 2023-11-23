@@ -38,7 +38,7 @@ if not LOADER_PATH:
     havocui.messagebox("Loader not found in: ", LOADER_PATH)
 
 # Create dialog and log widget
-dialog = havocui.Dialog("Matro7sh Myph Payload Generator", True, 670, 400)
+dialog = havocui.Dialog("Matro7sh 221b Payload Generator", True, 670, 400)
 log = havocui.Logger("matro7sh baker Log")
 
 
@@ -138,3 +138,10 @@ def build():
 
     dialog.addButton("Generate", run)
     dialog.exec()
+
+
+def loader_generator():
+    build()
+
+# Create Tab
+havocui.createtab("Matro7sh 221b", "221b loader", loader_generator)
