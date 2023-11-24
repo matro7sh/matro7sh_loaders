@@ -185,7 +185,7 @@ def myph_loader_generator():
         dialog.addCombobox(myph_change_shellcode_encrypt_method, *MYPH_ENCRYPT_TECHNIQUES)
 
 
-        dialog.addLabel("<b>[*] AES Encryption key (Default: random)</b>")
+        dialog.addLabel("<b>[*] Encryption key (Default: random)</b>")
         dialog.addLineedit("e.g. 0123456789ABCDEF1123345611111111", myph_change_default_key)
 
         dialog.addLabel("<b>[*] Process to inject to (Default: cmd.exe)</b>")
