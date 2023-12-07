@@ -43,7 +43,6 @@ dialog = havocui.Dialog("Matro7sh 221b Payload Generator", True, 670, 400)
 log = havocui.Logger("matro7sh baker Log")
 
 # set PWD to BAKER_LOADER_PATH location and download helper files
-os.chdir('/tmp')
 urllib.request.urlretrieve(
     "https://raw.githubusercontent.com/matro7sh/221b/main/versioninfo.json",
     "/tmp/versioninfo.json"
