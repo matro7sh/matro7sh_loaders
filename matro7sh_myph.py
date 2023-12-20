@@ -13,8 +13,9 @@ from datetime import datetime
 
 # Configuration
 MYPH_LOADER_PATH = shutil.which("myph")
-MYPH_EXEC_TECHNIQUES = ["CRT", "ProcessHollowing", "CreateThread", "Syscall"]
+MYPH_EXEC_TECHNIQUES = ["CRT", "CRTx", "CreateFiber", "ProcessHollowing", "CreateThread", "EnumCalendarInfoA", "Syscall", "Etwp"]
 MYPH_ENCRYPT_TECHNIQUES = ["AES", "chacha20", "XOR", "blowfish"]
+
 
 # Variables & Defaults
 myph_shellcode_path = ""
@@ -23,6 +24,8 @@ myph_shellcode_encryption_kind = "AES"
 myph_target_process = "cmd.exe"
 myph_shellcode_execution_technique = "CRT"
 myph_output_path = "/tmp/myph.exe"
+myph_persistence_reg_name = ""
+
 
 # Colors
 HAVOC_ERROR = "#ff5555"  # Red
@@ -35,6 +38,7 @@ HAVOC_WARNING = "#ffb86c"  # Orange
 # Labels
 myph_label_to_replace = f"<b style=\"color:{HAVOC_ERROR};\">No shellcode selected.</b>"
 myph_label_execution_technique = ""
+
 
 if not MYPH_LOADER_PATH:
     print("[-] Loader not found in $PATH")
@@ -58,9 +62,14 @@ def myph_change_shellcode_exec_method(num):
     warn_label = f"<b style=\"color:{HAVOC_WARNING};\">This method will not use the Process To Inject setting.</b>"
     techniques_to_warn = {
         "CreateThread": warn_label,
+        "CreateFiber": warn_label,
+        "CreateThread": warn_label,
+        "EnumCalendarInfoA": warn_label,
+        "Etwp": warn_label,
         "Syscall": warn_label,
         "ProcessHollowing": "",
         "CRT": "",
+        "CRTx": "",
     }
     dialog.replaceLabel(myph_label_execution_technique, techniques_to_warn[myph_shellcode_execution_technique])
     myph_label_execution_technique = techniques_to_warn[myph_shellcode_execution_technique]
@@ -86,6 +95,16 @@ def myph_change_shellcode_encrypt_method(num):
     print("[*] Shellcode encryption method changed: ", myph_shellcode_encryption_kind)
 
 
+def myph_change_persistence_reg_setting(reg):
+    global myph_persistence_reg_name
+
+    if reg:
+        myph_persistence_reg_name = reg
+    else:
+        myph_persistence_reg_name = ""
+    print(f"[*] Enabled registry persistence (payload name: {reg})")
+
+
 def myph_change_shellcode_path():
     global myph_shellcode_path
     global myph_label_to_replace
@@ -108,6 +127,7 @@ def myph_run():
         global myph_target_process
         global myph_shellcode_encryption_kind
         global myph_output_path
+        global myph_persistence_reg_name
 
         myph_output_path = havocui.savefiledialog("Output Path").decode("ascii")
         print("[*] Output Path changed: ", myph_output_path, ".")
@@ -127,6 +147,9 @@ def myph_run():
 
         if myph_shellcode_execution_technique != "":
             base_cmd = f'{base_cmd} --technique {myph_shellcode_execution_technique}'
+
+        if myph_persistence_reg_name != "":
+            base_cmd = f'{base_cmd} --persistence {myph_persistence_reg_name}'
 
         base_cmd = f'{base_cmd} --out {myph_output_path}'
         print(f"[+] Command to be run: {base_cmd}")
@@ -190,6 +213,9 @@ def myph_loader_generator():
 
         dialog.addLabel("<b>[*] Process to inject to (Default: cmd.exe)</b>")
         dialog.addLineedit("e.g. teams.exe", myph_change_target_process)
+
+        dialog.addLabel("<b>[*] Binary name for Registry Key persistence")
+        dialog.addLineedit("leave empty if you dont want to use persistence from Myph", myph_persistence_reg_name)
 
         dialog.addButton("Generate", myph_run)
         dialog.exec()
